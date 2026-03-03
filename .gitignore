@@ -1,0 +1,39 @@
+# =========================
+# Compiled Binaries & Objects
+# =========================
+*.exe
+*.obj
+*.o
+*.a
+*.lib
+*.dll
+*.pdb
+*.exp
+
+# =========================
+# CMake Build Files
+# =========================
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+
+# =========================
+# CLion & IDE Specific
+# =========================
+# CLion puts all compiled files in these directories by default
+cmake-build-*/
+out/
+
+# CLion project settings folder
+.idea/
+
+# =========================
+# OS Generated Files
+# =========================
+Thumbs.db
+ehthumbs.db
+.DS_Store
