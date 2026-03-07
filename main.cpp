@@ -8,7 +8,7 @@
 #include "Shader.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
+int processInput(GLFWwindow* window);
 
 int main()
 {
@@ -96,10 +96,6 @@ int main()
                           (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-
-
-
-
     // -- texture1 data loading --
     unsigned int texture1, texture2;
     glGenTextures(1, &texture1);
@@ -158,10 +154,11 @@ int main()
     // -- debug for wireframe mode --
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-
+    int res;
+    float mixValue = 0.2f;
     // -- render loop --
     while(!glfwWindowShouldClose(window)){
-        processInput(window);
+        res = processInput(window);
 
         glClearColor(r, g, b, a);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -176,6 +173,16 @@ int main()
         glUniform1i(glGetUniformLocation(shaderProgram.ID, "texture1"), 0);
         glUniform1i(glGetUniformLocation(shaderProgram.ID, "texture2"), 1);
 
+        if(res == 2 && mixValue < 1.0f) // up, opecaity changes up
+        {
+            mixValue += 0.001f;
+        }
+        else if(res == 3 && mixValue > 0.0f)
+        {
+            mixValue -= 0.001f;
+        }
+        shaderProgram.setFloat("mixValue", mixValue);
+
 //        float timeVal = glfwGetTime();
 //        float greenVal = static_cast<float>(sin(timeVal) / 2.0f + 0.5f);
 //        shaderProgram.setFloat("", 1.0f);
@@ -183,9 +190,7 @@ int main()
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glfwSwapBuffers(window);
         glfwPollEvents();
-
     }
-    //TODO: finish the duplication of the texture(ex 2)
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
@@ -199,10 +204,20 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow* window)
+int processInput(GLFWwindow* window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
+        return 1;
     }
+    else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    {
+        return 2;
+    }
+    else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+        return 3;
+    }
+    return 0;
 }
