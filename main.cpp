@@ -1,5 +1,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include "stb_image.h"
 
 #include <cmath>
@@ -154,6 +158,9 @@ int main()
     // -- debug for wireframe mode --
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+
+
+
     int res;
     float mixValue = 0.2f;
     // -- render loop --
@@ -172,6 +179,20 @@ int main()
         shaderProgram.use();
         glUniform1i(glGetUniformLocation(shaderProgram.ID, "texture1"), 0);
         glUniform1i(glGetUniformLocation(shaderProgram.ID, "texture2"), 1);
+
+        // define the transfomrations:
+        glm::mat4 translateMat = glm::mat4(1.0f);
+        translateMat = glm::rotate(translateMat, glm::radians(90.0f), glm::vec3
+                (0.0, 0.0, 1.0));
+        translateMat = glm::scale(translateMat, glm::vec3(0.5, 0.5, 0.5));
+
+        //passing the matrix to the shader
+        unsigned int transformLoc = glGetUniformLocation(shaderProgram.ID,
+                                                         "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr
+                (translateMat));
+
+
 
         if(res == 2 && mixValue < 1.0f) // up, opecaity changes up
         {
