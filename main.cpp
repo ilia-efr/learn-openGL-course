@@ -182,9 +182,12 @@ int main()
 
         // define the transfomrations:
         glm::mat4 translateMat = glm::mat4(1.0f);
-        translateMat = glm::rotate(translateMat, glm::radians(90.0f), glm::vec3
-                (0.0, 0.0, 1.0));
-        translateMat = glm::scale(translateMat, glm::vec3(0.5, 0.5, 0.5));
+
+
+
+        translateMat = glm::rotate(translateMat,float(glfwGetTime()*5.0) ,
+                                   glm::normalize(glm::vec3(0.0, 1.0, 1.0f)));
+        translateMat = glm::translate(translateMat, glm::vec3(0.5, 0.0, 0.0));
 
         //passing the matrix to the shader
         unsigned int transformLoc = glGetUniformLocation(shaderProgram.ID,
