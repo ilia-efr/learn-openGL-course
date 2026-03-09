@@ -57,11 +57,11 @@ int main()
     // -- vertex defintion --
     float vertices[] = {
             // positions          // colors           // texture1 coords
-            0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   2.0f, 2.0f,   // top right
-            0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   2.0f, 0.0f,   // bottom
+            0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+            0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom
             // right
             -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-            -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 2.0f    // top left
+            -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
     };
 
 
@@ -161,6 +161,9 @@ int main()
 
 
 
+
+
+
     int res;
     float mixValue = 0.2f;
     // -- render loop --
@@ -180,21 +183,25 @@ int main()
         glUniform1i(glGetUniformLocation(shaderProgram.ID, "texture1"), 0);
         glUniform1i(glGetUniformLocation(shaderProgram.ID, "texture2"), 1);
 
+        // -- model matrix
+        auto M = glm::mat4(1.0f);
+        auto V = glm::mat4(1.0f);
+
+        M = glm::rotate(M, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f) );
+        V = glm::translate(V, glm::vec3(0.0f, 0.0f, -2.0f));
+        glm::mat4 P = glm::perspective(glm::radians(45.0f), (800.0f/600.0f),
+                                       0.1f, 100.0f);
+
+        int mLoc = glGetUniformLocation(shaderProgram.ID, "M");
+        int vLoc = glGetUniformLocation(shaderProgram.ID, "V");
+        int pLoc = glGetUniformLocation(shaderProgram.ID, "P");
+
+        glUniformMatrix4fv(mLoc, 1, GL_FALSE, glm::value_ptr(M));
+        glUniformMatrix4fv(vLoc, 1, GL_FALSE, glm::value_ptr(V));
+        glUniformMatrix4fv(pLoc, 1, GL_FALSE, glm::value_ptr(P));
+
         // define the transfomrations:
-        glm::mat4 translateMat = glm::mat4(1.0f);
-
-
-
-        translateMat = glm::rotate(translateMat,float(glfwGetTime()*5.0) ,
-                                   glm::normalize(glm::vec3(0.0, 1.0, 1.0f)));
-        translateMat = glm::translate(translateMat, glm::vec3(0.5, 0.0, 0.0));
-
-        //passing the matrix to the shader
-        unsigned int transformLoc = glGetUniformLocation(shaderProgram.ID,
-                                                         "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr
-                (translateMat));
-
+        auto translateMat = glm::mat4(1.0f);
 
 
         if(res == 2 && mixValue < 1.0f) // up, opecaity changes up
