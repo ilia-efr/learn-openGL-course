@@ -12,6 +12,10 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 int processInput(GLFWwindow* window);
+void mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn);
+
+double lastX = 400;
+double flastY = 300;
 
 int main()
 {
@@ -44,6 +48,8 @@ int main()
 
 
     glEnable(GL_DEPTH_TEST);
+
+    glfwSetCursorPosCallback(window, mouse_callback);
 
     // -- SHADERS --
     Shader shaderProgram("vertex_shader.vs",
@@ -214,12 +220,16 @@ int main()
 
     int res;
     float mixValue = 0.2f;
-    // -- render loop --
+
+    //                          -- RENDER LOOP --
     while(!glfwWindowShouldClose(window)){
         res = processInput(window);
 
         if(res == 2 && mixValue < 1.0f) mixValue += 0.001f;
         if(res == 3 && mixValue > 0.0f) mixValue -= 0.001f;
+
+        float rotX = (lastX / 800.0f) * 360.0 - 180;
+        float rotY = (lastY / 600.0f) * 180.0 - 90;
 
         glClearColor(r, g, b, a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -250,17 +260,16 @@ int main()
         glUniformMatrix4fv(pLoc, 1, GL_FALSE, glm::value_ptr(P));
 
         glBindVertexArray(VAO);
-        for(unsigned int i = 0; i < std::size(cubePositions); i++)
-        {
-          M = glm::mat4(1.0f);
-          M = glm::translate(M, cubePositions[i]);
 
-          float angle = 20.0f * (float)i;
-            M = glm::rotate(M, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+        M = glm::mat4(1.0f);
+        M = glm::translate(M, cubePositions[0]);
 
-          shaderProgram.setMat4("M", M);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+        M = glm::rotate(glm::mat4(1.0f), glm::radians(rotX), glm::vec3(0.0f, 1.0f, 0.0f)); // Yaw
+        M = glm::rotate(M, glm::radians(rotY), glm::vec3(1.0f, 0.0f, 0.0f));
+
+        shaderProgram.setMat4("M", M);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -296,4 +305,9 @@ int processInput(GLFWwindow* window)
         return 3;
     }
     return 0;
+}
+void mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn)
+{
+    lastX = xPosIn;
+    lastY = yPosIn;
 }
