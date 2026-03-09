@@ -249,7 +249,8 @@ int main()
 
         // -- MVP matrix --
         glm::mat4 V = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f)); // Move camera back
-        glm::mat4 P = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        glm::mat4 P = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f,
+                                       0.1f, 100.0f);
 
         int vLoc = glGetUniformLocation(shaderProgram.ID, "V");
         int pLoc = glGetUniformLocation(shaderProgram.ID, "P");
