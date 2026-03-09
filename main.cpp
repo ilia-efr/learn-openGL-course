@@ -15,7 +15,7 @@ int processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn);
 
 double lastX = 400;
-double flastY = 300;
+double lastY = 300;
 
 int main()
 {
@@ -228,8 +228,8 @@ int main()
         if(res == 2 && mixValue < 1.0f) mixValue += 0.001f;
         if(res == 3 && mixValue > 0.0f) mixValue -= 0.001f;
 
-        float rotX = (lastX / 800.0f) * 360.0 - 180;
-        float rotY = (lastY / 600.0f) * 180.0 - 90;
+        float rotX = ((float)lastX / 800.0f) * 360.0f - 180.0f;
+        float rotY = ((float)lastY / 600.0f) * 180.0f - 90.0f;
 
         glClearColor(r, g, b, a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -306,6 +306,8 @@ int processInput(GLFWwindow* window)
     }
     return 0;
 }
+
+// callback to get the mouse position on the window
 void mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn)
 {
     lastX = xPosIn;
