@@ -44,6 +44,8 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 
+    glEnable(GL_DEPTH_TEST);
+
     // -- SHADERS --
     Shader shaderProgram("vertex_shader.vs",
                          "frag_shader.fs");
@@ -199,11 +201,6 @@ int main()
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 
-
-
-
-
-
     int res;
     float mixValue = 0.2f;
     // -- render loop --
@@ -211,7 +208,7 @@ int main()
         res = processInput(window);
 
         glClearColor(r, g, b, a);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
@@ -263,6 +260,8 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
