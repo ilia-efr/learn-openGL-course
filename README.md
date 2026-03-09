@@ -17,9 +17,10 @@ This repo contains my personal implementations and progression of the learnOpenG
 ## Progress Status:
 
 - [x] Getting Started
--[ ] Small Game
--[ ] Lighting 
--[ ] Model Loading
--[ ] Advanced OpenGL
--[ ] Advanced Lighting
--[ ] PBR
+- [ ] Small Game
+- [ ] Lighting 
+- [ ] Model Loading
+- [ ] Advanced OpenGL
+- [ ] Advanced Lighting
+- [ ] PBR
+ 
