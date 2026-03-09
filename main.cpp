@@ -6,7 +6,6 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "stb_image.h"
 
-#include <cmath>
 #include <iostream>
 
 #include "Shader.h"
@@ -116,6 +115,19 @@ int main()
             1, 2, 3
     };
 
+    glm::vec3 cubePositions[] = {
+            glm::vec3( 0.0f,  0.0f,  0.0f),
+            glm::vec3( 2.0f,  5.0f, -15.0f),
+            glm::vec3(-1.5f, -2.2f, -2.5f),
+            glm::vec3(-3.8f, -2.0f, -12.3f),
+            glm::vec3( 2.4f, -0.4f, -3.5f),
+            glm::vec3(-1.7f,  3.0f, -7.5f),
+            glm::vec3( 1.3f, -2.0f, -2.5f),
+            glm::vec3( 1.5f,  2.0f, -2.5f),
+            glm::vec3( 1.5f,  0.2f, -1.5f),
+            glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+
     // -- Buffer Setup --
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
@@ -200,12 +212,14 @@ int main()
     // -- debug for wireframe mode --
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-
     int res;
     float mixValue = 0.2f;
     // -- render loop --
     while(!glfwWindowShouldClose(window)){
         res = processInput(window);
+
+        if(res == 2 && mixValue < 1.0f) mixValue += 0.001f;
+        if(res == 3 && mixValue > 0.0f) mixValue -= 0.001f;
 
         glClearColor(r, g, b, a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -217,46 +231,37 @@ int main()
         glBindTexture(GL_TEXTURE_2D, texture2);
         // --triangle draw--
         shaderProgram.use();
+
+        shaderProgram.setFloat("mixValue", mixValue);
+
         glUniform1i(glGetUniformLocation(shaderProgram.ID, "texture1"), 0);
         glUniform1i(glGetUniformLocation(shaderProgram.ID, "texture2"), 1);
 
-        // -- model matrix
-        auto M = glm::mat4(1.0f);
-        auto V = glm::mat4(1.0f);
+        // -- MVP matrix --
+        glm::mat4 V = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f)); // Move camera back
+        glm::mat4 P = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
-        M = glm::rotate(M, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f) );
-        V = glm::translate(V, glm::vec3(0.0f, 0.0f, -2.0f));
-        glm::mat4 P = glm::perspective(glm::radians(45.0f), (800.0f/600.0f),
-                                       0.1f, 100.0f);
-
-        int mLoc = glGetUniformLocation(shaderProgram.ID, "M");
         int vLoc = glGetUniformLocation(shaderProgram.ID, "V");
         int pLoc = glGetUniformLocation(shaderProgram.ID, "P");
 
-        glUniformMatrix4fv(mLoc, 1, GL_FALSE, glm::value_ptr(M));
+        auto M = glm::mat4(1.0f);
+
         glUniformMatrix4fv(vLoc, 1, GL_FALSE, glm::value_ptr(V));
         glUniformMatrix4fv(pLoc, 1, GL_FALSE, glm::value_ptr(P));
 
-        // define the transfomrations:
-        auto translateMat = glm::mat4(1.0f);
-
-
-        if(res == 2 && mixValue < 1.0f) // up, opecaity changes up
+        glBindVertexArray(VAO);
+        for(unsigned int i = 0; i < std::size(cubePositions); i++)
         {
-            mixValue += 0.001f;
-        }
-        else if(res == 3 && mixValue > 0.0f)
-        {
-            mixValue -= 0.001f;
-        }
-        shaderProgram.setFloat("mixValue", mixValue);
+          M = glm::mat4(1.0f);
+          M = glm::translate(M, cubePositions[i]);
 
-//        float timeVal = glfwGetTime();
-//        float greenVal = static_cast<float>(sin(timeVal) / 2.0f + 0.5f);
-//        shaderProgram.setFloat("", 1.0f);
+          float angle = 20.0f * (float)i;
+            M = glm::rotate(M, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
-//        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+          shaderProgram.setMat4("M", M);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
