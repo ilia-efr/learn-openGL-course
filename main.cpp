@@ -195,12 +195,6 @@ int main()
     }
     stbi_image_free(data);
 
-
-    // -- camera setup --
-    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 cameraDir = glm::normalize(cameraPos - cameraTarget);
-
     // -- debug for wireframe mode --
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -225,8 +219,25 @@ int main()
         glUniform1i(glGetUniformLocation(shaderProgram.ID, "texture1"), 0);
         glUniform1i(glGetUniformLocation(shaderProgram.ID, "texture2"), 1);
 
+        // -- camera setup --
+        glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 3.0f);
+        glm::vec3 camTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 camDir = glm::normalize(camPos - camTarget);
+
+        glm::vec3 up = glm::vec3(1.0f, 1.0f, 1.0f);
+        glm::vec3 camRight = glm::normalize(glm::cross(up, camDir));
+        glm::vec3 camUp = glm::cross(camDir, camRight);
+
+        glm::mat4 V;
+        float radius = 10.0f;
+        float camX = static_cast<float>(sin(glfwGetTime()) * radius);
+        float camZ = static_cast<float>(cos(glfwGetTime()) * radius);
+        V = glm::lookAt(glm::vec3(camX, 0.0f, camZ),
+                        glm::vec3(0.0f, 0.0f, 0.0f),
+                        glm::vec3(0.0f, 1.0f, 0.0f));
+        shaderProgram.setMat4("V", V);
+
         // -- MVP matrix --
-        glm::mat4 V = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f)); // Move camera back
         glm::mat4 P = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f,
                                        0.1f, 100.0f);
 
