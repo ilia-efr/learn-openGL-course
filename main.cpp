@@ -12,11 +12,24 @@
 // -- function definitions --
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
+void scroll_callback(GLFWwindow* window, double xpos, double ypos);
 void mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn);
 
+// global constants
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+
 // -- global variables
-double lastX = 400;
-double lastY = 300;
+double lastX = static_cast<double>(SCR_WIDTH/2.0);
+double lastY = static_cast<double>(SCR_HEIGHT/2.0);
+
+float pitch = 0.0f;
+float yaw = -90.0f;
+float roll = 0.0f;
+
+// -- timing setup --
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
 
 // -- camera setup --
 glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -50,6 +63,7 @@ int main()
     glViewport(0, 0, 800, 600);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glEnable(GL_DEPTH_TEST);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouse_callback);
 
     // -- SHADERS --
