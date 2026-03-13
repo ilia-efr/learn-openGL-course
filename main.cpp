@@ -8,6 +8,7 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "stb_image.h"
 #include "Shader.h"
+#include "camera.h"
 
 // -- function definitions --
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -25,21 +26,11 @@ float lastY = (SCR_HEIGHT/2.0);
 
 bool firstMouse = true;
 
-float pitch = 0.0f;
-float yaw = -90.0f;
-float roll = 0.0f;
-
-float fov = 45.0;
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
 // -- timing setup --
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-
-// -- camera setup --
-glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 camFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 camUp = glm::vec3(0.0f, 1.0f, 0.0f);
-glm::vec3 camRight = glm::normalize(glm::cross(camFront, camUp));
 
 int main()
 {
@@ -226,6 +217,10 @@ int main()
     while(!glfwWindowShouldClose(window)){
 
 
+        float currentFrame = static_cast<float>(glfwGetTime());
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
         glClearColor(bgR, bgG, bgB, bgA);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -246,15 +241,11 @@ int main()
 
 
         glm::mat4 V;
-        V = glm::lookAt(
-                camPos,
-                camPos + camFront,
-                camUp
-        );
+        V = camera.GetMatrix();
         shaderProgram.setMat4("V", V);
 
         // -- MVP matrix --
-        glm::mat4 P = glm::perspective(glm::radians(fov), 800.0f / 600.0f,
+        glm::mat4 P = glm::perspective(glm::radians(camera.Zoom), 800.0f / 600.0f,
                                        0.1f, 100.0f);
 
         int vLoc = glGetUniformLocation(shaderProgram.ID, "V");
@@ -301,13 +292,13 @@ void processInput(GLFWwindow* window)
     }
     const float camSpeed = 0.005f;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camPos += camSpeed * camFront;
+        camera.ProcessKeyboard(FORWARD, deltaTime);
     if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camPos -= camSpeed * camFront;
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
     if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camPos += camSpeed * camRight;
+        camera.ProcessKeyboard(RIGHT, deltaTime);
     if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camPos -= camSpeed * camRight;
+        camera.ProcessKeyboard(LEFT, deltaTime);
 }
 
 // callback to get the mouse position on the window
@@ -327,33 +318,12 @@ void mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn)
     lastX = xpos;
     lastY = ypos;
 
-    float sensitivity = 0.1f;
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
-
-    yaw += xoffset;
-    pitch += yoffset;
-
-    if(pitch > 89.0f)
-        pitch = 89.0f;
-    if(pitch < -89.0f)
-        pitch = -89.0f;
-
-    glm::vec3 front;
-    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front.y = sin(glm::radians(pitch));
-    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    camFront = glm::normalize(front);
-    camRight =glm::normalize(glm::cross(camFront, camUp));
+    camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    fov -= (float)yoffset;
-    if(fov < 1.0f)
-        fov = 1.0f;
-    if(fov > 45.0f)
-        fov = 45.0f;
+    camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
 
