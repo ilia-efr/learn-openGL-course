@@ -9,15 +9,20 @@
 #include "stb_image.h"
 #include "Shader.h"
 
+// -- function definitions --
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void processInput(GLFWwindow* window);
+void mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn);
 
 // -- global variables
 double lastX = 400;
 double lastY = 300;
 
-// -- function definitions --
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-int processInput(GLFWwindow* window);
-void mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn);
+// -- camera setup --
+glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 camFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 camUp = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::vec3 camRight = glm::normalize(glm::cross(camFront, camUp));
 
 int main()
 {
@@ -219,22 +224,14 @@ int main()
         glUniform1i(glGetUniformLocation(shaderProgram.ID, "texture1"), 0);
         glUniform1i(glGetUniformLocation(shaderProgram.ID, "texture2"), 1);
 
-        // -- camera setup --
-        glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 3.0f);
-        glm::vec3 camTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-        glm::vec3 camDir = glm::normalize(camPos - camTarget);
 
-        glm::vec3 up = glm::vec3(1.0f, 1.0f, 1.0f);
-        glm::vec3 camRight = glm::normalize(glm::cross(up, camDir));
-        glm::vec3 camUp = glm::cross(camDir, camRight);
 
         glm::mat4 V;
-        float radius = 10.0f;
-        float camX = static_cast<float>(sin(glfwGetTime()) * radius);
-        float camZ = static_cast<float>(cos(glfwGetTime()) * radius);
-        V = glm::lookAt(glm::vec3(camX, 0.0f, camZ),
-                        glm::vec3(0.0f, 0.0f, 0.0f),
-                        glm::vec3(0.0f, 1.0f, 0.0f));
+        V = glm::lookAt(
+                camPos,
+                camPos + camFront,
+                camUp
+        );
         shaderProgram.setMat4("V", V);
 
         // -- MVP matrix --
@@ -260,7 +257,7 @@ int main()
             glDrawArrays(GL_TRIANGLES, 0, 36); // no element draw
         }
 
-        inputRes = processInput(window);
+        processInput(window);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -277,22 +274,21 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
 }
 
-int processInput(GLFWwindow* window)
+void processInput(GLFWwindow* window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
-        return 1;
     }
-    else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-    {
-        return 2;
-    }
-    else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    {
-        return 3;
-    }
-    return 0;
+    const float camSpeed = 0.005f;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camPos += camSpeed * camFront;
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camPos -= camSpeed * camFront;
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camPos += camSpeed * camRight;
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camPos -= camSpeed * camRight;
 }
 
 // callback to get the mouse position on the window
